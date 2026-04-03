@@ -61,6 +61,10 @@ func (l *Lox) runPrompt() {
 		}
 
 		line := input.Bytes()
+		if string(line) == ".exit" {
+			fmt.Println("Exiting...")
+			os.Exit(0)
+		}
 		l.run(line)
 		l.hadError = false
 	}
