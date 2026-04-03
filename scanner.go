@@ -83,10 +83,26 @@ func (s *Scanner) scanToken() {
 		} else {
 			s.addToken(Greater)
 		}
+	case '/':
+		// If you encounter two slashes in a row, consume a comment until the end of the line
+		if s.match('/') {
+			for s.peek() != '\n' && !s.isAtEnd() {
+				s.advance()
+			}
+		} else {
+			s.addToken(Slash)
+		}
 	default:
 		vm.err(s.line, "Unexpected character.")
 	}
+}
 
+func (s *Scanner) peek() rune {
+	if s.isAtEnd() {
+		return 0
+	}
+
+	return s.source[s.current]
 }
 
 func (s *Scanner) match(expected rune) bool {
