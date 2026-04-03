@@ -59,10 +59,48 @@ func (s *Scanner) scanToken() {
 		s.addToken(Semicolon)
 	case '*':
 		s.addToken(Star)
+	case '!':
+		if s.match('=') {
+			s.addToken(BangEqual)
+		} else {
+			s.addToken(Bang)
+		}
+	case '=':
+		if s.match('=') {
+			s.addToken(EqualEqual)
+		} else {
+			s.addToken(Equal)
+		}
+	case '<':
+		if s.match('=') {
+			s.addToken(LessEqual)
+		} else {
+			s.addToken(Less)
+		}
+	case '>':
+		if s.match('=') {
+			s.addToken(GreaterEqual)
+		} else {
+			s.addToken(Greater)
+		}
 	default:
 		vm.err(s.line, "Unexpected character.")
 	}
 
+}
+
+func (s *Scanner) match(expected rune) bool {
+	if s.isAtEnd() {
+		return false
+	}
+
+	if s.source[s.current] != expected {
+		return false
+	}
+
+	s.current++
+
+	return true
 }
 
 func (s *Scanner) addToken(t TokenType) {
