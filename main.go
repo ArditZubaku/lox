@@ -10,19 +10,20 @@ type Lox struct {
 	hadError bool
 }
 
-func main() {
-	l := new(Lox)
+//vm as in virtual machine
+var vm = Lox{}
 
+func main() {
 	if len(os.Args) > 2 {
 		fmt.Println("Usage: golox [script]")
 		os.Exit(64)
 	} else if len(os.Args) == 2 {
-		if err := l.runFile(os.Args[1]); err != nil {
+		if err := vm.runFile(os.Args[1]); err != nil {
 			// TODO: Rethink this
 			os.Exit(1)
 		}
 	} else {
-		l.runPrompt()
+		vm.runPrompt()
 	}
 }
 

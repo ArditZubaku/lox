@@ -59,6 +59,8 @@ func (s *Scanner) scanToken() {
 		s.addToken(Semicolon)
 	case '*':
 		s.addToken(Star)
+	default:
+		vm.err(s.line, "Unexpected character.")
 	}
 
 }
