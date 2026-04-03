@@ -1,3 +1,5 @@
+//go:generate stringer -type=TokenType
+
 package main
 
 type TokenType byte
