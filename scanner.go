@@ -92,6 +92,9 @@ func (s *Scanner) scanToken() {
 		} else {
 			s.addToken(Slash)
 		}
+	case ' ', '\r', '\t':
+	case '\n':
+		s.line++
 	default:
 		vm.err(s.line, "Unexpected character.")
 	}
