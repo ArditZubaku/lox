@@ -11,7 +11,7 @@ const (
 	LeftBrace
 	RightBrace
 	Comma
-	TokenTypeDot
+	Dot
 	Minus
 	Plus
 	Semicolon

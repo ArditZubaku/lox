@@ -13,7 +13,7 @@ func _() {
 	_ = x[LeftBrace-2]
 	_ = x[RightBrace-3]
 	_ = x[Comma-4]
-	_ = x[TokenTypeDot-5]
+	_ = x[Dot-5]
 	_ = x[Minus-6]
 	_ = x[Plus-7]
 	_ = x[Semicolon-8]
@@ -49,9 +49,9 @@ func _() {
 	_ = x[EOF-38]
 }
 
-const _TokenType_name = "LeftParenRightParenLeftBraceRightBraceCommaTokenTypeDotMinusPlusSemicolonSlashStarBangBangEqualEqualEqualEqualGreaterGreaterEqualLessLessEqualIdentifierStringNumberAndClassElseFalseFunForIfNilOrPrintReturnSuperThisTrueVarWhileEOF"
+const _TokenType_name = "LeftParenRightParenLeftBraceRightBraceCommaDotMinusPlusSemicolonSlashStarBangBangEqualEqualEqualEqualGreaterGreaterEqualLessLessEqualIdentifierStringNumberAndClassElseFalseFunForIfNilOrPrintReturnSuperThisTrueVarWhileEOF"
 
-var _TokenType_index = [...]uint8{0, 9, 19, 28, 38, 43, 55, 60, 64, 73, 78, 82, 86, 95, 100, 110, 117, 129, 133, 142, 152, 158, 164, 167, 172, 176, 181, 184, 187, 189, 192, 194, 199, 205, 210, 214, 218, 221, 226, 229}
+var _TokenType_index = [...]uint8{0, 9, 19, 28, 38, 43, 46, 51, 55, 64, 69, 73, 77, 86, 91, 101, 108, 120, 124, 133, 143, 149, 155, 158, 163, 167, 172, 175, 178, 180, 183, 185, 190, 196, 201, 205, 209, 212, 217, 220}
 
 func (i TokenType) String() string {
 	idx := int(i) - 0
