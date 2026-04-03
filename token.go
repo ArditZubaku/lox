@@ -24,5 +24,5 @@ func NewToken(
 }
 
 func (t *Token) String() string {
-	return fmt.Sprintf("%s %s %v", string(t.Type), t.Lexeme, t.Literal)
+	return fmt.Sprintf("%s %s %v", t.Type, t.Lexeme, t.Literal)
 }
