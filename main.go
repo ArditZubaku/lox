@@ -42,11 +42,12 @@ func (l *Lox) runFile(path string) error {
 	return nil
 }
 
-func (l *Lox) run(code []byte) {
-	runes := []rune(string(code))
+func (l *Lox) run(source []byte) {
+	scanner := NewScanner(string(source))
+	scanner.scanTokens()
 
-	for _, token := range runes {
-		fmt.Println(string(token))
+	for _, token := range scanner.tokens {
+		fmt.Println(token)
 	}
 }
 
