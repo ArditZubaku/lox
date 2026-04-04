@@ -1,5 +1,7 @@
 package main
 
+import "strconv"
+
 type Scanner struct {
 	start   int
 	current int
@@ -98,8 +100,41 @@ func (s *Scanner) scanToken() {
 	case '"':
 		s.scanString()
 	default:
-		vm.err(s.line, "Unexpected character.")
+		if s.isDigit(c) {
+			s.scanNumber()
+		} else {
+			vm.err(s.line, "Unexpected character.")
+		}
 	}
+}
+
+func (s *Scanner) scanNumber() {
+	for s.isDigit(s.peek()) {
+		s.advance()
+	}
+
+	// Look for a fractional part
+	if s.peek() == '.' && s.isDigit(s.peekNext()) {
+		// Consume the '.'
+		s.advance()
+
+		for s.isDigit(s.peek()) {
+			s.advance()
+		}
+	}
+
+	txt := string(s.source[s.start:s.current])
+	num, err := strconv.ParseFloat(txt, 64)
+	if err != nil {
+		vm.err(s.line, "Unexpected number literal.")
+		return
+	}
+
+	s.addTokenWithLiteral(Number, num)
+}
+
+func (s *Scanner) isDigit(c rune) bool {
+	return c >= '0' && c <= '9'
 }
 
 func (s *Scanner) scanString() {
@@ -129,6 +164,14 @@ func (s *Scanner) peek() rune {
 	}
 
 	return s.source[s.current]
+}
+
+func (s *Scanner) peekNext() rune {
+	if s.current+1 >= len(s.source) {
+		return 0
+	}
+
+	return s.source[s.current+1]
 }
 
 func (s *Scanner) match(expected rune) bool {
