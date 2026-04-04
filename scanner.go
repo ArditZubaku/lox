@@ -115,7 +115,13 @@ func (s *Scanner) scanIdentifier() {
 		s.advance()
 	}
 
-	s.addToken(Identifier)
+	txt := string(s.source[s.start:s.current])
+	tokenType, ok := keywords[txt]
+	if !ok {
+		tokenType = Identifier
+	}
+
+	s.addToken(tokenType)
 }
 
 func (s *Scanner) isAlpha(c rune) bool {
