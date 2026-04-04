@@ -102,10 +102,28 @@ func (s *Scanner) scanToken() {
 	default:
 		if s.isDigit(c) {
 			s.scanNumber()
+		} else if s.isAlpha(c) {
+			s.scanIdentifier()
 		} else {
 			vm.err(s.line, ErrUnexpectedCharacter)
 		}
 	}
+}
+
+func (s *Scanner) scanIdentifier() {
+	for s.isAlphaNumeric(s.peek()) {
+		s.advance()
+	}
+
+	s.addToken(Identifier)
+}
+
+func (s *Scanner) isAlpha(c rune) bool {
+	return (c >= 'a' && c <= 'z') || (c >= 'A' && c <= 'Z') || c == '_'
+}
+
+func (s *Scanner) isAlphaNumeric(c rune) bool {
+	return s.isAlpha(c) || s.isDigit(c)
 }
 
 func (s *Scanner) scanNumber() {
