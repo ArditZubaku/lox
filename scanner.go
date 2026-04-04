@@ -95,9 +95,32 @@ func (s *Scanner) scanToken() {
 	case ' ', '\r', '\t':
 	case '\n':
 		s.line++
+	case '"':
+		s.scanString()
 	default:
 		vm.err(s.line, "Unexpected character.")
 	}
+}
+
+func (s *Scanner) scanString() {
+	for s.peek() != '"' && !s.isAtEnd() {
+		if s.peek() == '\n' {
+			s.line++
+		}
+		s.advance()
+	}
+
+	if s.isAtEnd() {
+		vm.err(s.line, "Unterminated string.")
+	}
+
+	// The closing "
+	s.advance()
+
+	// Trim the surrounding quotes
+	// value := string(s.source[s.start+1 : s.current-1])
+	value := string(s.source[s.start+1 : s.current-1])
+	s.addTokenWithLiteral(String, value)
 }
 
 func (s *Scanner) peek() rune {
