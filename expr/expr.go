@@ -1,4 +1,6 @@
-package main
+package expr
+
+import "github.com/ArditZubaku/lox/token"
 
 // TODO: This should be constrained better and not be an `any`
 // NOTE: I'd rather name this `Do` but I see the convention is to name it `Accept`
@@ -15,7 +17,7 @@ type Visitor[R any] interface {
 
 type Binary[R any] struct {
 	Left     Expr[R]
-	Operator Token
+	Operator token.Token
 	Right    Expr[R]
 }
 
@@ -28,6 +30,6 @@ type Literal struct {
 }
 
 type Unary[R any] struct {
-	Operator Token
+	Operator token.Token
 	Right    Expr[R]
 }
