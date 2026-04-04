@@ -103,7 +103,7 @@ func (s *Scanner) scanToken() {
 		if s.isDigit(c) {
 			s.scanNumber()
 		} else {
-			vm.err(s.line, "Unexpected character.")
+			vm.err(s.line, ErrUnexpectedCharacter)
 		}
 	}
 }
@@ -126,7 +126,7 @@ func (s *Scanner) scanNumber() {
 	txt := string(s.source[s.start:s.current])
 	num, err := strconv.ParseFloat(txt, 64)
 	if err != nil {
-		vm.err(s.line, "Unexpected number literal.")
+		vm.err(s.line, ErrInvalidNumberLiteral)
 		return
 	}
 
@@ -146,7 +146,7 @@ func (s *Scanner) scanString() {
 	}
 
 	if s.isAtEnd() {
-		vm.err(s.line, "Unterminated string.")
+		vm.err(s.line, ErrUnterminatedString)
 	}
 
 	// The closing "
