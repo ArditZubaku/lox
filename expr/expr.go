@@ -11,7 +11,7 @@ type Expr[R any] interface {
 type Visitor[R any] interface {
 	VisitBinaryExpr(Binary[R]) R
 	VisitGroupingExpr(Grouping[R]) R
-	VisitLiteralExpr(Literal) R
+	VisitLiteralExpr(Literal[R]) R
 	VisitUnaryExpr(Unary[R]) R
 }
 
@@ -25,11 +25,27 @@ type Grouping[R any] struct {
 	Expression Expr[R]
 }
 
-type Literal struct {
+type Literal[R any] struct {
 	Value any
 }
 
 type Unary[R any] struct {
 	Operator token.Token
 	Right    Expr[R]
+}
+
+func (b Binary[R]) Accept(v Visitor[R]) R {
+	return v.VisitBinaryExpr(b)
+}
+
+func (l Literal[R]) Accept(v Visitor[R]) R {
+	return v.VisitLiteralExpr(l)
+}
+
+func (g Grouping[R]) Accept(v Visitor[R]) R {
+	return v.VisitGroupingExpr(g)
+}
+
+func (u Unary[R]) Accept(v Visitor[R]) R {
+	return v.VisitUnaryExpr(u)
 }

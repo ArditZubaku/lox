@@ -20,7 +20,7 @@ func (p *AstPrinter) VisitGroupingExpr(expr Grouping[string]) string {
 	return p.parenthesize("group", expr.Expression)
 }
 
-func (p *AstPrinter) VisitLiteralExpr(expr Literal) string {
+func (p *AstPrinter) VisitLiteralExpr(expr Literal[string]) string {
 	if expr.Value == nil {
 		return "nil"
 	}
