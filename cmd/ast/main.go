@@ -8,16 +8,16 @@ import (
 )
 
 func main() {
-	expression := expr.Binary[string]{
-		Left: expr.Unary[string]{
+	expression := &expr.Binary{
+		Left: &expr.Unary{
 			Operator: token.NewToken(token.Minus, "-", nil, 1),
-			Right: expr.Literal[string]{
+			Right: &expr.Literal{
 				Value: 123,
 			},
 		},
 		Operator: token.NewToken(token.Star, "*", nil, 1),
-		Right: expr.Grouping[string]{
-			Expression: expr.Literal[string]{
+		Right: &expr.Grouping{
+			Expression: &expr.Literal{
 				Value: 45.67,
 			},
 		},

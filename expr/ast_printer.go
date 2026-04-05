@@ -8,19 +8,19 @@ import (
 
 type AstPrinter struct{}
 
-func (p *AstPrinter) Print(expr Expr[string]) string {
+func (p *AstPrinter) Print(expr Expr) Value {
 	return expr.Accept(p)
 }
 
-func (p *AstPrinter) VisitBinaryExpr(expr Binary[string]) string {
+func (p *AstPrinter) VisitBinaryExpr(expr *Binary) Value {
 	return p.parenthesize(expr.Operator.Lexeme, expr.Left, expr.Right)
 }
 
-func (p *AstPrinter) VisitGroupingExpr(expr Grouping[string]) string {
+func (p *AstPrinter) VisitGroupingExpr(expr *Grouping) Value {
 	return p.parenthesize("group", expr.Expression)
 }
 
-func (p *AstPrinter) VisitLiteralExpr(expr Literal[string]) string {
+func (p *AstPrinter) VisitLiteralExpr(expr *Literal) Value {
 	if expr.Value == nil {
 		return "nil"
 	}
@@ -35,18 +35,22 @@ func (p *AstPrinter) VisitLiteralExpr(expr Literal[string]) string {
 	}
 }
 
-func (p *AstPrinter) VisitUnaryExpr(expr Unary[string]) string {
+func (p *AstPrinter) VisitUnaryExpr(expr *Unary) Value {
 	return p.parenthesize(expr.Operator.Lexeme, expr.Right)
 }
 
-func (p *AstPrinter) parenthesize(name string, exprs ...Expr[string]) string {
+func (p *AstPrinter) parenthesize(name string, exprs ...Expr) Value {
 	var builder strings.Builder
 
 	builder.WriteRune('(')
 	builder.WriteString(name)
 	for _, expr := range exprs {
 		builder.WriteRune(' ')
-		builder.WriteString(expr.Accept(p))
+		s, ok := expr.Accept(p).(string)
+		if !ok {
+			s = fmt.Sprintf("%v", expr.Accept(p))
+		}
+		builder.WriteString(s)
 	}
 	builder.WriteRune(')')
 	return builder.String()

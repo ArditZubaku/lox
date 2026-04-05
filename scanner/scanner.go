@@ -16,7 +16,7 @@ type Scanner struct {
 	line    int
 
 	source []rune
-	tokens []*token.Token
+	tokens []token.Token
 
 	vm vm
 }
@@ -25,7 +25,7 @@ func NewScanner(vm vm, source string) *Scanner {
 	return &Scanner{
 		vm:      vm,
 		source:  []rune(source),
-		tokens:  []*token.Token{},
+		tokens:  []token.Token{},
 		line:    1,
 		start:   0,
 		current: 0,
@@ -40,7 +40,7 @@ func (s *Scanner) ScanTokens() {
 
 	s.tokens = append(
 		s.tokens,
-		&token.Token{
+		token.Token{
 			Type:    token.EOF,
 			Lexeme:  "",
 			Literal: nil,
@@ -49,7 +49,7 @@ func (s *Scanner) ScanTokens() {
 	)
 }
 
-func (s *Scanner) GetTokens() []*token.Token {
+func (s *Scanner) GetTokens() []token.Token {
 	return s.tokens
 }
 
@@ -264,7 +264,7 @@ func (s *Scanner) addTokenWithLiteral(t token.Type, literal any) {
 	txt := string(s.source[s.start:s.current])
 	s.tokens = append(
 		s.tokens,
-		&token.Token{
+		token.Token{
 			Type:    t,
 			Lexeme:  txt,
 			Literal: literal,

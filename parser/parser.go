@@ -7,30 +7,29 @@ import (
 	"github.com/ArditZubaku/lox/token"
 )
 
-// TODO: Rethink the `any` or I could probably get rid of generics EVERYWHERE
-type Parser[T any] struct {
+type Parser struct {
 	tokens  []token.Token
 	current int
 }
 
-func NewParser(tokens []token.Token) *Parser[any] {
-	return &Parser[any]{
+func NewParser(tokens []token.Token) Parser {
+	return Parser{
 		tokens:  tokens,
 		current: 0,
 	}
 }
 
-func (p *Parser[T]) expression() expr.Expr[T] {
+func (p *Parser) expression() expr.Expr {
 	return p.equality()
 }
 
-func (p *Parser[T]) equality() expr.Expr[T] {
+func (p *Parser) equality() expr.Expr {
 	expression := p.comparison()
 
 	for p.match(token.BangEqual, token.EqualEqual) {
 		operator := p.previous()
 		right := p.comparison()
-		expression = expr.Binary[T]{
+		expression = &expr.Binary{
 			Left:     expression,
 			Operator: operator,
 			Right:    right,
@@ -40,7 +39,7 @@ func (p *Parser[T]) equality() expr.Expr[T] {
 	return expression
 }
 
-func (p *Parser[T]) match(types ...token.Type) bool {
+func (p *Parser) match(types ...token.Type) bool {
 	if slices.ContainsFunc(types, p.check) {
 		p.advance()
 		return true
@@ -49,13 +48,13 @@ func (p *Parser[T]) match(types ...token.Type) bool {
 	return false
 }
 
-func (p *Parser[T]) comparison() expr.Expr[T] {
+func (p *Parser) comparison() expr.Expr {
 	expression := p.term()
 
 	for p.match(token.Greater, token.GreaterEqual, token.Less, token.LessEqual) {
 		operator := p.previous()
 		right := p.term()
-		expression = expr.Binary[T]{
+		expression = &expr.Binary{
 			Left:     expression,
 			Operator: operator,
 			Right:    right,
@@ -65,13 +64,13 @@ func (p *Parser[T]) comparison() expr.Expr[T] {
 	return expression
 }
 
-func (p *Parser[T]) term() expr.Expr[T] {
+func (p *Parser) term() expr.Expr {
 	expression := p.factor()
 
 	for p.match(token.Minus, token.Plus) {
 		operator := p.previous()
 		right := p.factor()
-		expression = expr.Binary[T]{
+		expression = &expr.Binary{
 			Left:     expression,
 			Operator: operator,
 			Right:    right,
@@ -81,12 +80,12 @@ func (p *Parser[T]) term() expr.Expr[T] {
 	return expression
 }
 
-func (p *Parser[T]) factor() expr.Expr[T] {
+func (p *Parser) factor() expr.Expr {
 	expression := p.unary()
 	for p.match(token.Slash, token.Star) {
 		operator := p.previous()
 		right := p.unary()
-		expression = expr.Binary[T]{
+		expression = &expr.Binary{
 			Left:     expression,
 			Operator: operator,
 			Right:    right,
@@ -96,11 +95,11 @@ func (p *Parser[T]) factor() expr.Expr[T] {
 	return expression
 }
 
-func (p *Parser[T]) unary() expr.Expr[T] {
+func (p *Parser) unary() expr.Expr {
 	if p.match(token.Bang, token.Minus) {
 		operator := p.previous()
 		right := p.unary()
-		return expr.Unary[T]{
+		return &expr.Unary{
 			Operator: operator,
 			Right:    right,
 		}
@@ -109,27 +108,27 @@ func (p *Parser[T]) unary() expr.Expr[T] {
 	return p.primary()
 }
 
-func (p *Parser[T]) primary() expr.Expr[T] {
+func (p *Parser) primary() expr.Expr {
 	if p.match(token.False) {
-		return expr.Literal[T]{
+		return &expr.Literal{
 			Value: false,
 		}
 	}
 
 	if p.match(token.True) {
-		return expr.Literal[T]{
+		return &expr.Literal{
 			Value: true,
 		}
 	}
 
 	if p.match(token.Nil) {
-		return expr.Literal[T]{
+		return &expr.Literal{
 			Value: nil,
 		}
 	}
 
 	if p.match(token.Number, token.String) {
-		return expr.Literal[T]{
+		return &expr.Literal{
 			Value: p.previous().Literal,
 		}
 	}
@@ -137,7 +136,7 @@ func (p *Parser[T]) primary() expr.Expr[T] {
 	if p.match(token.LeftParen) {
 		expression := p.expression()
 		p.consume(token.RightParen, "Expect ')' after expression.")
-		return expr.Grouping[T]{
+		return &expr.Grouping{
 			Expression: expression,
 		}
 	}
@@ -145,11 +144,11 @@ func (p *Parser[T]) primary() expr.Expr[T] {
 	return nil
 }
 
-func (p *Parser[T]) consume(paren token.Type, s string) {
+func (p *Parser) consume(paren token.Type, s string) {
 	panic("unimplemented")
 }
 
-func (p *Parser[T]) check(t token.Type) bool {
+func (p *Parser) check(t token.Type) bool {
 	if p.isAtEnd() {
 		return false
 	}
@@ -157,7 +156,7 @@ func (p *Parser[T]) check(t token.Type) bool {
 	return p.peek().Type == t
 }
 
-func (p *Parser[T]) advance() token.Token {
+func (p *Parser) advance() token.Token {
 	if !p.isAtEnd() {
 		p.current++
 	}
@@ -165,14 +164,14 @@ func (p *Parser[T]) advance() token.Token {
 	return p.previous()
 }
 
-func (p *Parser[T]) isAtEnd() bool {
+func (p *Parser) isAtEnd() bool {
 	return p.peek().Type == token.EOF
 }
 
-func (p *Parser[T]) peek() token.Token {
+func (p *Parser) peek() token.Token {
 	return p.tokens[p.current]
 }
 
-func (p *Parser[T]) previous() token.Token {
+func (p *Parser) previous() token.Token {
 	return p.tokens[p.current-1]
 }
