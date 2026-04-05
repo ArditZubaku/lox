@@ -5,7 +5,9 @@ import (
 	"fmt"
 	"os"
 
+	"github.com/ArditZubaku/lox/parser"
 	"github.com/ArditZubaku/lox/scanner"
+	"github.com/ArditZubaku/lox/token"
 )
 
 type Lox struct {
@@ -57,6 +59,14 @@ func (l *Lox) run(source []byte) {
 
 func (l *Lox) ReportErr(line int, err error) {
 	l.report(line, "", err)
+}
+
+func (l *Lox) ReportParseError(err parser.ParseError) {
+	if err.Token.Type == token.EOF {
+		l.report(err.Token.Line, " at end", err)
+	} else {
+		l.report(err.Token.Line, " at '"+err.Token.Lexeme+"'", err)
+	}
 }
 
 func (l *Lox) report(line int, where string, err error) {

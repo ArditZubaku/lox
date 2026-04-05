@@ -7,28 +7,40 @@ import (
 	"github.com/ArditZubaku/lox/token"
 )
 
+type vm interface {
+	ReportParseError(err ParseError)
+}
+
 type Parser struct {
 	tokens  []token.Token
 	current int
+	vm      vm
 }
 
-func NewParser(tokens []token.Token) Parser {
+func NewParser(vm vm, tokens []token.Token) Parser {
 	return Parser{
+		vm:      vm,
 		tokens:  tokens,
 		current: 0,
 	}
 }
 
-func (p *Parser) expression() expr.Expr {
+func (p *Parser) expression() (expr.Expr, error) {
 	return p.equality()
 }
 
-func (p *Parser) equality() expr.Expr {
-	expression := p.comparison()
+func (p *Parser) equality() (expr.Expr, error) {
+	expression, err := p.comparison()
+	if err != nil {
+		return nil, err
+	}
 
 	for p.match(token.BangEqual, token.EqualEqual) {
 		operator := p.previous()
-		right := p.comparison()
+		right, err := p.comparison()
+		if err != nil {
+			return nil, err
+		}
 		expression = &expr.Binary{
 			Left:     expression,
 			Operator: operator,
@@ -36,7 +48,7 @@ func (p *Parser) equality() expr.Expr {
 		}
 	}
 
-	return expression
+	return expression, nil
 }
 
 func (p *Parser) match(types ...token.Type) bool {
@@ -48,12 +60,18 @@ func (p *Parser) match(types ...token.Type) bool {
 	return false
 }
 
-func (p *Parser) comparison() expr.Expr {
-	expression := p.term()
+func (p *Parser) comparison() (expr.Expr, error) {
+	expression, err := p.term()
+	if err != nil {
+		return nil, err
+	}
 
 	for p.match(token.Greater, token.GreaterEqual, token.Less, token.LessEqual) {
 		operator := p.previous()
-		right := p.term()
+		right, err := p.term()
+		if err != nil {
+			return nil, err
+		}
 		expression = &expr.Binary{
 			Left:     expression,
 			Operator: operator,
@@ -61,15 +79,21 @@ func (p *Parser) comparison() expr.Expr {
 		}
 	}
 
-	return expression
+	return expression, nil
 }
 
-func (p *Parser) term() expr.Expr {
-	expression := p.factor()
+func (p *Parser) term() (expr.Expr, error) {
+	expression, err := p.factor()
+	if err != nil {
+		return nil, err
+	}
 
 	for p.match(token.Minus, token.Plus) {
 		operator := p.previous()
-		right := p.factor()
+		right, err := p.factor()
+		if err != nil {
+			return nil, err
+		}
 		expression = &expr.Binary{
 			Left:     expression,
 			Operator: operator,
@@ -77,14 +101,21 @@ func (p *Parser) term() expr.Expr {
 		}
 	}
 
-	return expression
+	return expression, nil
 }
 
-func (p *Parser) factor() expr.Expr {
-	expression := p.unary()
+func (p *Parser) factor() (expr.Expr, error) {
+	expression, err := p.unary()
+	if err != nil {
+		return nil, err
+	}
+
 	for p.match(token.Slash, token.Star) {
 		operator := p.previous()
-		right := p.unary()
+		right, err := p.unary()
+		if err != nil {
+			return nil, err
+		}
 		expression = &expr.Binary{
 			Left:     expression,
 			Operator: operator,
@@ -92,60 +123,73 @@ func (p *Parser) factor() expr.Expr {
 		}
 	}
 
-	return expression
+	return expression, nil
 }
 
-func (p *Parser) unary() expr.Expr {
+func (p *Parser) unary() (expr.Expr, error) {
 	if p.match(token.Bang, token.Minus) {
 		operator := p.previous()
-		right := p.unary()
+		right, err := p.unary()
+		if err != nil {
+			return nil, err
+		}
 		return &expr.Unary{
 			Operator: operator,
 			Right:    right,
-		}
+		}, nil
 	}
 
 	return p.primary()
 }
 
-func (p *Parser) primary() expr.Expr {
+func (p *Parser) primary() (expr.Expr, error) {
 	if p.match(token.False) {
 		return &expr.Literal{
 			Value: false,
-		}
+		}, nil
 	}
 
 	if p.match(token.True) {
 		return &expr.Literal{
 			Value: true,
-		}
+		}, nil
 	}
 
 	if p.match(token.Nil) {
 		return &expr.Literal{
 			Value: nil,
-		}
+		}, nil
 	}
 
 	if p.match(token.Number, token.String) {
 		return &expr.Literal{
 			Value: p.previous().Literal,
-		}
+		}, nil
 	}
 
 	if p.match(token.LeftParen) {
-		expression := p.expression()
-		p.consume(token.RightParen, "Expect ')' after expression.")
+		expression, err := p.expression()
+		if err != nil {
+			return nil, err
+		}
+		_, err = p.consume(token.RightParen, "Expect ')' after expression.")
+		if err != nil {
+			return nil, err
+		}
 		return &expr.Grouping{
 			Expression: expression,
-		}
+		}, nil
 	}
 
-	return nil
+	return nil, ParseError{Token: p.peek(), Msg: "Expect expression."}
 }
 
-func (p *Parser) consume(paren token.Type, s string) {
-	panic("unimplemented")
+func (p *Parser) consume(t token.Type, msg string) (token.Token, error) {
+	if p.check(t) {
+		return p.advance(), nil
+	}
+
+	return token.Token{}, ParseError{Token: p.peek(), Msg: msg}
 }
 
 func (p *Parser) check(t token.Type) bool {
