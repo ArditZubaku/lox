@@ -35,100 +35,25 @@ func (p *Parser) expression() (expr.Expr, error) {
 }
 
 func (p *Parser) equality() (expr.Expr, error) {
-	expression, err := p.comparison()
-	if err != nil {
-		return nil, err
-	}
-
-	for p.match(token.BangEqual, token.EqualEqual) {
-		operator := p.previous()
-		right, err := p.comparison()
-		if err != nil {
-			return nil, err
-		}
-		expression = &expr.Binary{
-			Left:     expression,
-			Operator: operator,
-			Right:    right,
-		}
-	}
-
-	return expression, nil
-}
-
-func (p *Parser) match(types ...token.Type) bool {
-	if slices.ContainsFunc(types, p.check) {
-		p.advance()
-		return true
-	}
-
-	return false
+	return p.parseBinary(p.comparison, token.BangEqual, token.EqualEqual)
 }
 
 func (p *Parser) comparison() (expr.Expr, error) {
-	expression, err := p.term()
-	if err != nil {
-		return nil, err
-	}
-
-	for p.match(token.Greater, token.GreaterEqual, token.Less, token.LessEqual) {
-		operator := p.previous()
-		right, err := p.term()
-		if err != nil {
-			return nil, err
-		}
-		expression = &expr.Binary{
-			Left:     expression,
-			Operator: operator,
-			Right:    right,
-		}
-	}
-
-	return expression, nil
+	return p.parseBinary(
+		p.term,
+		token.Greater,
+		token.GreaterEqual,
+		token.Less,
+		token.LessEqual,
+	)
 }
 
 func (p *Parser) term() (expr.Expr, error) {
-	expression, err := p.factor()
-	if err != nil {
-		return nil, err
-	}
-
-	for p.match(token.Minus, token.Plus) {
-		operator := p.previous()
-		right, err := p.factor()
-		if err != nil {
-			return nil, err
-		}
-		expression = &expr.Binary{
-			Left:     expression,
-			Operator: operator,
-			Right:    right,
-		}
-	}
-
-	return expression, nil
+	return p.parseBinary(p.factor, token.Minus, token.Plus)
 }
 
 func (p *Parser) factor() (expr.Expr, error) {
-	expression, err := p.unary()
-	if err != nil {
-		return nil, err
-	}
-
-	for p.match(token.Slash, token.Star) {
-		operator := p.previous()
-		right, err := p.unary()
-		if err != nil {
-			return nil, err
-		}
-		expression = &expr.Binary{
-			Left:     expression,
-			Operator: operator,
-			Right:    right,
-		}
-	}
-
-	return expression, nil
+	return p.parseBinary(p.unary, token.Slash, token.Star)
 }
 
 func (p *Parser) unary() (expr.Expr, error) {
@@ -187,6 +112,41 @@ func (p *Parser) primary() (expr.Expr, error) {
 	}
 
 	return nil, ParseError{Token: p.peek(), Msg: "Expect expression."}
+}
+
+func (p *Parser) parseBinary(
+	parseOperand func() (expr.Expr, error),
+	operators ...token.Type,
+) (expr.Expr, error) {
+	left, err := parseOperand()
+	if err != nil {
+		return nil, err
+	}
+
+	for p.match(operators...) {
+		operator := p.previous()
+		right, err := parseOperand()
+		if err != nil {
+			return nil, err
+		}
+
+		left = &expr.Binary{
+			Left:     left,
+			Operator: operator,
+			Right:    right,
+		}
+	}
+
+	return left, nil
+}
+
+func (p *Parser) match(types ...token.Type) bool {
+	if slices.ContainsFunc(types, p.check) {
+		p.advance()
+		return true
+	}
+
+	return false
 }
 
 func (p *Parser) consume(t token.Type, msg string) (token.Token, error) {
