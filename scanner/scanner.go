@@ -14,10 +14,11 @@ type Scanner struct {
 	start   int
 	current int
 	line    int
-	vm      vm
 
 	source []rune
 	tokens []*token.Token
+
+	vm vm
 }
 
 func NewScanner(vm vm, source string) *Scanner {
