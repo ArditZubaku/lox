@@ -21,7 +21,7 @@ type Scanner struct {
 	vm vm
 }
 
-func NewScanner(vm vm, source string) *Scanner {
+func New(vm vm, source string) *Scanner {
 	return &Scanner{
 		vm:      vm,
 		source:  []rune(source),

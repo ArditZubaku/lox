@@ -17,7 +17,7 @@ type Parser struct {
 	vm      vm
 }
 
-func NewParser(vm vm, tokens []token.Token) Parser {
+func New(vm vm, tokens []token.Token) Parser {
 	return Parser{
 		vm:      vm,
 		tokens:  tokens,
@@ -25,6 +25,11 @@ func NewParser(vm vm, tokens []token.Token) Parser {
 	}
 }
 
+func (p *Parser) Parse() (expr.Expr, error) {
+	return p.expression()
+}
+
+// TODO: If this doesn't get extended with more functionality later let's just rename this to Parse()
 func (p *Parser) expression() (expr.Expr, error) {
 	return p.equality()
 }

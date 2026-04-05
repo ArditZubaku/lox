@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"os"
 
+	"github.com/ArditZubaku/lox/expr"
 	"github.com/ArditZubaku/lox/parser"
 	"github.com/ArditZubaku/lox/scanner"
 	"github.com/ArditZubaku/lox/token"
@@ -49,12 +50,17 @@ func (l *Lox) RunFile(path string) error {
 }
 
 func (l *Lox) run(source []byte) {
-	sc := scanner.NewScanner(l, string(source))
+	sc := scanner.New(l, string(source))
 	sc.ScanTokens()
 
-	for _, token := range sc.GetTokens() {
-		fmt.Println(token)
+	prs := parser.New(l, sc.GetTokens())
+	expression, err := prs.Parse()
+	if err != nil || l.hadError {
+		return
 	}
+
+	printer := expr.AstPrinter{}
+	fmt.Println(printer.Print(expression))
 }
 
 func (l *Lox) ReportErr(line int, err error) {
