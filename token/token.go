@@ -3,20 +3,20 @@ package token
 import "fmt"
 
 type Token struct {
-	Type    TokenType
+	Type    Type
 	Lexeme  string
 	Literal any
 	Line    int
 }
 
 func NewToken(
-	tokenType TokenType,
+	Type Type,
 	lexeme string,
 	literal any,
 	line int,
 ) Token {
 	return Token{
-		Type:    tokenType,
+		Type:    Type,
 		Lexeme:  lexeme,
 		Literal: literal,
 		Line:    line,

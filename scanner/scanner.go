@@ -159,12 +159,12 @@ func (s *Scanner) scanIdentifier() {
 	}
 
 	txt := string(s.source[s.start:s.current])
-	tokenType, ok := keywords[txt]
+	Type, ok := keywords[txt]
 	if !ok {
-		tokenType = token.Identifier
+		Type = token.Identifier
 	}
 
-	s.addToken(tokenType)
+	s.addToken(Type)
 }
 
 func (s *Scanner) isAlpha(c rune) bool {
@@ -255,11 +255,11 @@ func (s *Scanner) match(expected rune) bool {
 	return true
 }
 
-func (s *Scanner) addToken(t token.TokenType) {
+func (s *Scanner) addToken(t token.Type) {
 	s.addTokenWithLiteral(t, nil)
 }
 
-func (s *Scanner) addTokenWithLiteral(t token.TokenType, literal any) {
+func (s *Scanner) addTokenWithLiteral(t token.Type, literal any) {
 	txt := string(s.source[s.start:s.current])
 	s.tokens = append(
 		s.tokens,

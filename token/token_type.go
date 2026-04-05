@@ -1,12 +1,12 @@
-//go:generate stringer -type=TokenType
+//go:generate stringer -type=Type
 
 package token
 
-type TokenType byte
+type Type byte
 
 const (
 	// Single-character tokens.
-	LeftParen TokenType = iota // LeftParen
+	LeftParen Type = iota // LeftParen
 	RightParen
 	LeftBrace
 	RightBrace

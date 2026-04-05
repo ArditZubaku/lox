@@ -4,7 +4,7 @@ import "github.com/ArditZubaku/lox/token"
 
 // TODO: Try replacing this with the https://github.com/lemire/constmap just for fun
 // keywords is a map of the reserved keywords
-var keywords = map[string]token.TokenType{
+var keywords = map[string]token.Type{
 	"and":    token.And,
 	"class":  token.Class,
 	"else":   token.Else,
