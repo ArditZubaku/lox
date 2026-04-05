@@ -219,3 +219,28 @@ func (p *Parser) peek() token.Token {
 func (p *Parser) previous() token.Token {
 	return p.tokens[p.current-1]
 }
+
+func (p *Parser) synchronize() {
+	p.advance()
+
+	for !p.isAtEnd() {
+		if p.previous().Type == token.Semicolon {
+			return
+		}
+
+		switch p.peek().Type {
+		case
+			token.Class,
+			token.Fun,
+			token.Var,
+			token.For,
+			token.If,
+			token.While,
+			token.Print,
+			token.Return:
+			return
+		}
+
+		p.advance()
+	}
+}
